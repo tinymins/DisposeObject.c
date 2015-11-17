@@ -4,7 +4,6 @@
 /// Reference: (HOW TO Enumerate Handles):                                ///
 /// http://forum.sysinternals.com/howto-enumerate-handles_topic18892.html ///
 /// Usage: DisposeHandle.exe <PID> <HANDLE_NAME>                          ///
-/// Notice: Set <PID> to 0 means find handle in all processes.            ///
 /// Sample: DisposeHandle.exe 7814 \Sessions\1\BaseNamedObjects\0DF11826  ///
 /////////////////////////////////////////////////////////////////////////////
 #ifndef UNICODE
@@ -185,7 +184,7 @@ int wmain(int argc, WCHAR *argv[])
         ULONG returnLength;
 
         /* Check if this handle belongs to the PID the user specified. */
-        if (pid != 0 && handle.ProcessId != pid)
+        if (handle.ProcessId != pid)
             continue;
 
         /* Duplicate the handle so we can query it. */
