@@ -152,6 +152,10 @@ int wmain(int argc, WCHAR *argv[])
         printf("Could not open PID %d! (Don't try to open a system process.)\n", pid);
         return 1;
     }
+	else
+	{
+		printf("Querying objects with PID %d...\n", pid);
+	}
 
     handleInfo = (PSYSTEM_HANDLE_INFORMATION)malloc(handleInfoSize);
 
