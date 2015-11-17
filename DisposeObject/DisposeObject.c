@@ -336,6 +336,20 @@ int wmain(int argc, WCHAR *argv[])
 echo off
 cls
 color 0A
+cd %~dp0
+%~d0
+REM Require Admin
+set UAC=0
+bcdedit>nul
+if errorlevel 1 set UAC=1
+if %UAC%==1 (
+color CE
+echo Please run this script as administrator.
+pause
+color 0A
+exit
+)
+REM Admin Required
 echo --------------------
 echo Querying objects...
 echo --------------------
