@@ -140,7 +140,9 @@ int wmain(int argc, WCHAR *argv[])
 
     if (argc < 2)
     {
-        printf("Usage: handles [pid]\n");
+		printf("Usage: DisposeObject.exe <PID> <OBJECT_NAME>\n\n");
+		printf("Source: https://github.com/tinymins/DisposeObject.c\n");
+		printf("        Please visit github to find more usages and updates.\n");
         return 1;
     }
 
@@ -358,5 +360,6 @@ for /f "tokens=2 " %%a in ('tasklist /fi "imagename eq TargetProcessName.exe" /n
 	DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\OBJECTS
 	DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\NAMES
 )
+echo --------------------
 pause
 ************************************************************************************/
