@@ -329,3 +329,20 @@ int wmain(int argc, WCHAR *argv[])
 
     return 0;
 }
+/************************************************************************/
+/* If you want to apply with a process name, here's the bat code.       */
+/************************************************************************/
+/************************************************************************************
+echo off
+cls
+color 0A
+echo --------------------
+echo Querying objects...
+echo --------------------
+for /f "tokens=2 " %%a in ('tasklist /fi "imagename eq TargetProcessName.exe" /nh') do (
+	DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\SOME
+	DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\OBJECTS
+	DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\NAMES
+)
+pause
+************************************************************************************/
