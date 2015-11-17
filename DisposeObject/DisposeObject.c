@@ -154,7 +154,7 @@ int wmain(int argc, WCHAR *argv[])
     }
 	else
 	{
-		printf("Querying objects with PID %d...\n", pid);
+		printf("Querying objects with PID %d, NAME %.*S...\n", pid, oname.Length / 2, oname.Buffer);
 	}
 
     handleInfo = (PSYSTEM_HANDLE_INFORMATION)malloc(handleInfoSize);
