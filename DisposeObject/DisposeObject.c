@@ -118,9 +118,40 @@ typedef LONG (NTAPI *_RtlCompareUnicodeString)(
     BOOLEAN         CaseInSensitive
     );
 
+BOOLEAN RtlFindUnicodeString(
+    IN PUNICODE_STRING str,
+    IN PUNICODE_STRING substr,
+    IN BOOLEAN caseInSensitive,
+    OUT PUSHORT pos
+    )
+{
+    _RtlCompareUnicodeString RtlCompareUnicodeString =
+        GetLibraryProcAddress("ntdll.dll", "RtlCompareUnicodeString");
+    USHORT index;
+
+    if(RtlCompareUnicodeString(str, substr, caseInSensitive)){
+        if (pos) {
+            *pos = 0;
+        }
+        return TRUE;
+    }
+
+    for(index = 0; index + (substr->Length/sizeof(WCHAR)) <= (str->Length/sizeof(WCHAR)); index++) {
+        if (_wcsnicmp( &str->Buffer[index],
+            substr->Buffer,
+            (substr->Length / sizeof(WCHAR)) ) == 0) {
+                if (pos) {
+                    *pos = index*sizeof(WCHAR);
+                }
+                return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 int wmain(int argc, WCHAR *argv[])
 {
-    _NtQuerySystemInformation NtQuerySystemInformation = 
+    _NtQuerySystemInformation NtQuerySystemInformation =
         GetLibraryProcAddress("ntdll.dll", "NtQuerySystemInformation");
     _NtDuplicateObject NtDuplicateObject =
         GetLibraryProcAddress("ntdll.dll", "NtDuplicateObject");
@@ -156,12 +187,12 @@ int wmain(int argc, WCHAR *argv[])
     }
     else
     {
-        printf("Querying objects with PID %d, NAME %.*S...\n", pid, oname.Length / 2, oname.Buffer);
+        printf("Querying objects with PID %d, NAME contains %.*S...\n", pid, oname.Length / 2, oname.Buffer);
     }
 
     handleInfo = (PSYSTEM_HANDLE_INFORMATION)malloc(handleInfoSize);
 
-    /* NtQuerySystemInformation won't give us the correct buffer size, 
+    /* NtQuerySystemInformation won't give us the correct buffer size,
        so we guess by doubling the buffer size. */
     while ((status = NtQuerySystemInformation(
         SystemHandleInformation,
@@ -223,7 +254,7 @@ int wmain(int argc, WCHAR *argv[])
             continue;
         }
 
-        /* Query the object name (unless it has an access of 
+        /* Query the object name (unless it has an access of
            0x0012019f, on which NtQueryObject could hang. */
         if (handle.GrantedAccess == 0x0012019f)
         {
@@ -288,7 +319,7 @@ int wmain(int argc, WCHAR *argv[])
             //     objectName.Buffer
             //     );
 
-            nCompareResult = RtlCompareUnicodeString(&objectName, &oname, TRUE);
+            nCompareResult = RtlFindUnicodeString(&objectName, &oname, TRUE, NULL);
             if (nCompareResult == 0 && NT_SUCCESS(NtDuplicateObject(
                 processHandle,
                 handle.Handle,
@@ -355,11 +386,21 @@ REM Admin Required
 echo --------------------
 echo Querying objects...
 echo --------------------
-for /f "tokens=2 " %%a in ('tasklist /fi "imagename eq TargetProcessName.exe" /nh') do (
-    DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\SOME
-    DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\OBJECTS
-    DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\NAMES
-)
+for /f "tokens=2 " %%a in ('tasklist /fi "imagename eq JX3Client.exe" /nh') do (
+DisposeObject.exe %%a \BaseNamedObjects\A5DFEC3F
 echo --------------------
+DisposeObject.exe %%a \BaseNamedObjects\0DF11825
+echo --------------------
+DisposeObject.exe %%a \BaseNamedObjects\5D2D1767
+echo --------------------
+)
+for /f "tokens=2 " %%a in ('tasklist /fi "imagename eq JX3ClientX64.exe" /nh') do (
+DisposeObject.exe %%a \BaseNamedObjects\A5DFEC3F
+echo --------------------
+DisposeObject.exe %%a \BaseNamedObjects\0DF11825
+echo --------------------
+DisposeObject.exe %%a \BaseNamedObjects\5D2D1767
+echo --------------------
+)
 pause
 ************************************************************************************/
