@@ -87,77 +87,77 @@ PVOID GetLibraryProcAddress(PSTR LibraryName, PSTR ProcName)
 }
 
 typedef NTSTATUS (NTAPI *_NtQuerySystemInformation)(
-	ULONG SystemInformationClass,
-	PVOID SystemInformation,
-	ULONG SystemInformationLength,
-	PULONG ReturnLength
-	);
+    ULONG SystemInformationClass,
+    PVOID SystemInformation,
+    ULONG SystemInformationLength,
+    PULONG ReturnLength
+    );
 typedef NTSTATUS (NTAPI *_NtDuplicateObject)(
-	HANDLE SourceProcessHandle,
-	HANDLE SourceHandle,
-	HANDLE TargetProcessHandle,
-	PHANDLE TargetHandle,
-	ACCESS_MASK DesiredAccess,
-	ULONG Attributes,
-	ULONG Options
-	);
+    HANDLE SourceProcessHandle,
+    HANDLE SourceHandle,
+    HANDLE TargetProcessHandle,
+    PHANDLE TargetHandle,
+    ACCESS_MASK DesiredAccess,
+    ULONG Attributes,
+    ULONG Options
+    );
 typedef NTSTATUS (NTAPI *_NtQueryObject)(
-	HANDLE ObjectHandle,
-	ULONG ObjectInformationClass,
-	PVOID ObjectInformation,
-	ULONG ObjectInformationLength,
-	PULONG ReturnLength
-	);
+    HANDLE ObjectHandle,
+    ULONG ObjectInformationClass,
+    PVOID ObjectInformation,
+    ULONG ObjectInformationLength,
+    PULONG ReturnLength
+    );
 typedef LONG (NTAPI *_RtlInitUnicodeString)(
-	UNICODE_STRING* DestinationString,
-	PCWSTR          SourceString
-	);
+    UNICODE_STRING* DestinationString,
+    PCWSTR          SourceString
+    );
 typedef LONG (NTAPI *_RtlCompareUnicodeString)(
-	UNICODE_STRING* String1,
-	UNICODE_STRING* String2,
-	BOOLEAN         CaseInSensitive
-	);
+    UNICODE_STRING* String1,
+    UNICODE_STRING* String2,
+    BOOLEAN         CaseInSensitive
+    );
 
 int wmain(int argc, WCHAR *argv[])
 {
     _NtQuerySystemInformation NtQuerySystemInformation = 
         GetLibraryProcAddress("ntdll.dll", "NtQuerySystemInformation");
     _NtDuplicateObject NtDuplicateObject =
-		GetLibraryProcAddress("ntdll.dll", "NtDuplicateObject");
-	_NtQueryObject NtQueryObject =
-		GetLibraryProcAddress("ntdll.dll", "NtQueryObject");
-	_RtlInitUnicodeString RtlInitUnicodeString =
-		GetLibraryProcAddress("ntdll.dll", "RtlInitUnicodeString");
-	_RtlCompareUnicodeString RtlCompareUnicodeString =
-		GetLibraryProcAddress("ntdll.dll", "RtlCompareUnicodeString");
+        GetLibraryProcAddress("ntdll.dll", "NtDuplicateObject");
+    _NtQueryObject NtQueryObject =
+        GetLibraryProcAddress("ntdll.dll", "NtQueryObject");
+    _RtlInitUnicodeString RtlInitUnicodeString =
+        GetLibraryProcAddress("ntdll.dll", "RtlInitUnicodeString");
+    _RtlCompareUnicodeString RtlCompareUnicodeString =
+        GetLibraryProcAddress("ntdll.dll", "RtlCompareUnicodeString");
     NTSTATUS status;
     PSYSTEM_HANDLE_INFORMATION handleInfo;
     ULONG handleInfoSize = 0x10000;
     ULONG pid;
-	UNICODE_STRING oname;
+    UNICODE_STRING oname;
     HANDLE processHandle;
     ULONG i;
 
     if (argc < 2)
     {
-		printf("Usage: DisposeObject.exe <PID> <OBJECT_NAME>\n\n");
-		printf("Source: https://github.com/tinymins/DisposeObject.c\n");
-		printf("        Please visit github to find more usages and updates.\n");
+        printf("Usage: DisposeObject.exe <PID> <OBJECT_NAME>\n\n");
+        printf("Source: https://github.com/tinymins/DisposeObject.c\n");
+        printf("        Please visit github to find more usages and updates.\n");
         return 1;
     }
 
     pid = _wtoi(argv[1]);
-	RtlInitUnicodeString(&oname, argv[2]);
+    RtlInitUnicodeString(&oname, argv[2]);
 
     if (!(processHandle = OpenProcess(PROCESS_DUP_HANDLE, FALSE, pid)))
     {
         printf("Could not open PID %d! (Don't try to open a system process.)\n", pid);
         return 1;
     }
-	else
-	{
-		printf("Querying objects with PID %d, NAME %.*S...\n", pid, oname.Length / 2, oname.Buffer);
-	}
+    else
+    {
+        printf("Querying objects with PID %d, NAME %.*S...\n", pid, oname.Length / 2, oname.Buffer);
+    }
 
     handleInfo = (PSYSTEM_HANDLE_INFORMATION)malloc(handleInfoSize);
 
@@ -182,9 +182,9 @@ int wmain(int argc, WCHAR *argv[])
     {
         SYSTEM_HANDLE handle = handleInfo->Handles[i];
         HANDLE dupHandle = NULL;
-		HANDLE dupHandle1 = NULL;
-		LONG nCompareResult;
-		POBJECT_TYPE_INFORMATION objectTypeInfo;
+        HANDLE dupHandle1 = NULL;
+        LONG nCompareResult;
+        POBJECT_TYPE_INFORMATION objectTypeInfo;
         PVOID objectNameInfo;
         UNICODE_STRING objectName;
         ULONG returnLength;
@@ -288,27 +288,27 @@ int wmain(int argc, WCHAR *argv[])
             //     objectName.Buffer
             //     );
 
-			nCompareResult = RtlCompareUnicodeString(&objectName, &oname, TRUE);
-			if (nCompareResult == 0 && NT_SUCCESS(NtDuplicateObject(
-				processHandle,
-				handle.Handle,
-				GetCurrentProcess(),
-				&dupHandle1,
-				0,
-				0,
-				0x1
-				)))
-			{
-				printf(
-					"[%#x] %.*S: %.*S Closed!\n",
-					handle.Handle,
-					objectTypeInfo->Name.Length / 2,
-					objectTypeInfo->Name.Buffer,
-					objectName.Length / 2,
-					objectName.Buffer
-					);
-				CloseHandle(dupHandle1);
-			}
+            nCompareResult = RtlCompareUnicodeString(&objectName, &oname, TRUE);
+            if (nCompareResult == 0 && NT_SUCCESS(NtDuplicateObject(
+                processHandle,
+                handle.Handle,
+                GetCurrentProcess(),
+                &dupHandle1,
+                0,
+                0,
+                0x1
+                )))
+            {
+                printf(
+                    "[%#x] %.*S: %.*S Closed!\n",
+                    handle.Handle,
+                    objectTypeInfo->Name.Length / 2,
+                    objectTypeInfo->Name.Buffer,
+                    objectName.Length / 2,
+                    objectName.Buffer
+                    );
+                CloseHandle(dupHandle1);
+            }
         }
         else
         {
@@ -356,9 +356,9 @@ echo --------------------
 echo Querying objects...
 echo --------------------
 for /f "tokens=2 " %%a in ('tasklist /fi "imagename eq TargetProcessName.exe" /nh') do (
-	DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\SOME
-	DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\OBJECTS
-	DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\NAMES
+    DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\SOME
+    DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\OBJECTS
+    DisposeObject.exe %%a \Sessions\1\BaseNamedObjects\NAMES
 )
 echo --------------------
 pause
