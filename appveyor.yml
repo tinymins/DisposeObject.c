@@ -21,3 +21,5 @@ deploy: off
 artifacts:
   - path: Release\DisposeObject.exe
     name: DisposeObject.exe
+  - path: Release\DisposeJX3.bat
+    name: DisposeJX3.bat
