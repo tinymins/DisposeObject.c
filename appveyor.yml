@@ -15,11 +15,13 @@ build_script:
   - cd %APPVEYOR_BUILD_FOLDER%
   - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
   - msbuild DisposeObject.sln /p:Configuration=Release
+  - cd Release
+  - 7z a DisposeJX3.zip *
 
 test: off
 deploy: off
 artifacts:
   - path: Release\DisposeObject.exe
     name: DisposeObject.exe
-  - path: Release\DisposeJX3.bat
-    name: DisposeJX3.bat
+  - path: Release\DisposeJX3.zip
+    name: DisposeJX3.zip
