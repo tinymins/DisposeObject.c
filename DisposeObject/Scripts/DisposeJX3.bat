@@ -34,4 +34,6 @@ echo --------------------
 DisposeObject.exe %%a \BaseNamedObjects\5D2D1767
 echo --------------------
 )
+echo Press any key to open donate page, close window to exit.
 pause
+explorer "https://jx3.derzh.com/donate/"
